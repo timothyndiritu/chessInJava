@@ -1,4 +1,3 @@
-
 package com.chess.engine.pieces;
 
 import com.chess.engine.Alliance;
@@ -11,13 +10,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+public class Rook extends Piece {
 
-public class Rook extends Piece{
-        private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-8, -1, 1, 8 };
+    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-8, -1, 1, 8};
 
-    
-    public Rook(int piecePosition, Alliance pieceAlliance) {
-        super(piecePosition, pieceAlliance);
+    public Rook(final int piecePosition, final Alliance pieceAlliance) {
+        super(PieceType.ROOK, piecePosition, pieceAlliance);
     }
 
     @Override
@@ -30,12 +28,12 @@ public class Rook extends Piece{
             while (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
                 candidateDestinationCoordinate += candidateCoordinateOffset;
 
-                if(isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)||
-                   isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)     
-                        ){
-                    break; 
-                }
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+                    if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
+                            || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
+                        break;
+                    }
+
                     final chessTile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
 
                     if (!candidateDestinationTile.isTileOccupied()) {
@@ -57,6 +55,11 @@ public class Rook extends Piece{
         return ImmutableList.copyOf(legalMoves);
     }
 
+    @Override
+    public String toString() {
+        return Piece.PieceType.ROOK.toString();
+    }
+
     private static boolean isFirstColumnExclusion(final int currentPosition, final int candidateOffset) {
         return BoardUtils.FIRST_COLUMN[currentPosition] && (candidateOffset == -1);
     }
@@ -65,5 +68,4 @@ public class Rook extends Piece{
         return BoardUtils.EIGTH_COLUMN[currentPosition] && (candidateOffset == 1);
     }
 
-    
 }

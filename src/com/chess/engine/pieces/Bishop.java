@@ -12,10 +12,10 @@ import java.util.List;
 
 public class Bishop extends Piece {
 
-    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-9, -7, 7, 9 };
+    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-9, -7, 7, 9};
 
-    public Bishop(int piecePosition, Alliance pieceAlliance) {
-        super(piecePosition, pieceAlliance);
+    public Bishop(final int piecePosition, final Alliance pieceAlliance) {
+        super(PieceType.BISHOP, piecePosition, pieceAlliance);
     }
 
     @Override
@@ -28,12 +28,12 @@ public class Bishop extends Piece {
             while (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
                 candidateDestinationCoordinate += candidateCoordinateOffset;
 
-                if(isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)||
-                   isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)     
-                        ){
-                    break; 
-                }
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+                    if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
+                            || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
+                        break;
+                    }
+
                     final chessTile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
 
                     if (!candidateDestinationTile.isTileOccupied()) {
@@ -53,6 +53,11 @@ public class Bishop extends Piece {
 
         }
         return ImmutableList.copyOf(legalMoves);
+    }
+
+    @Override
+    public String toString() {
+        return Piece.PieceType.BISHOP.toString();
     }
 
     private static boolean isFirstColumnExclusion(final int currentPosition, final int candidateOffset) {

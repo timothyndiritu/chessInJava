@@ -14,8 +14,8 @@ public class Queen extends Piece {
 
     private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-9, -8, -7, -1, 1, 7, 8, 9};
 
-    public Queen(int piecePosition, Alliance pieceAlliance) {
-        super(piecePosition, pieceAlliance);
+    public Queen(final int piecePosition, final Alliance pieceAlliance) {
+        super(PieceType.QUEEN, piecePosition, pieceAlliance);
     }
 
     @Override
@@ -28,11 +28,12 @@ public class Queen extends Piece {
             while (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
                 candidateDestinationCoordinate += candidateCoordinateOffset;
 
-                if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
-                        || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
-                    break;
-                }
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+                    if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
+                            || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
+                        break;
+                    }
+
                     final chessTile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
 
                     if (!candidateDestinationTile.isTileOccupied()) {
@@ -54,12 +55,17 @@ public class Queen extends Piece {
         return ImmutableList.copyOf(legalMoves);
     }
 
+    @Override
+    public String toString() {
+        return Piece.PieceType.QUEEN.toString();
+    }
+
     private static boolean isFirstColumnExclusion(final int currentPosition, final int candidateOffset) {
         return BoardUtils.FIRST_COLUMN[currentPosition] && (candidateOffset == -1 || candidateOffset == -9 || candidateOffset == 7);
     }
 
     private static boolean isEigthColumnExclusion(final int currentPosition, final int candidateOffset) {
-        return BoardUtils.EIGTH_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 1|| candidateOffset == 9);
+        return BoardUtils.EIGTH_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 1 || candidateOffset == 9);
     }
 
 }
