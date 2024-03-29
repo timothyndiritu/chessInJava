@@ -33,6 +33,10 @@ public abstract class chessTile {
 
     public abstract Piece getPiece();
 
+    public int getTileCoordinate() {
+        return this.tileCoordinate;
+    }
+
     public static final class EmptyTile extends chessTile {
 
         private EmptyTile(final int coordinate) {
