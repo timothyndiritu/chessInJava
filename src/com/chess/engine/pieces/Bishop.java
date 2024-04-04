@@ -4,6 +4,8 @@ import com.chess.engine.Alliance;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.BoardUtils;
 import com.chess.engine.board.Move;
+import com.chess.engine.board.Move.MajorAttackMove;
+import com.chess.engine.board.Move.MajorMove;
 import com.chess.engine.board.chessTile;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -15,7 +17,11 @@ public class Bishop extends Piece {
     private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-9, -7, 7, 9};
 
     public Bishop(final int piecePosition, final Alliance pieceAlliance) {
-        super(PieceType.BISHOP, piecePosition, pieceAlliance);
+        super(PieceType.BISHOP, piecePosition, pieceAlliance, true);
+    }
+
+    public Bishop(final int piecePosition, final Alliance pieceAlliance, final boolean isFirstMove) {
+        super(PieceType.BISHOP, piecePosition, pieceAlliance, isFirstMove);
     }
 
     @Override
@@ -24,30 +30,25 @@ public class Bishop extends Piece {
 
         for (final int candidateCoordinateOffset : CANDIDATE_MOVE_VECTOR_COORDINATES) {
             int candidateDestinationCoordinate = this.piecePosition;
-
             while (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+                if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
+                        || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
+                    break;
+                }
                 candidateDestinationCoordinate += candidateCoordinateOffset;
 
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
-                    if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
-                            || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
-                        break;
-                    }
-
                     final chessTile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
-
                     if (!candidateDestinationTile.isTileOccupied()) {
-                        legalMoves.add(new Move.MajorMove(board, this, candidateDestinationCoordinate));
+                        legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
                     } else {
                         final Piece pieceAtDestination = candidateDestinationTile.getPiece();
                         final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-
                         if (this.pieceAlliance != pieceAlliance) {
-                            legalMoves.add(new Move.AttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                            legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
                         }
                         break;
                     }
-
                 }
             }
 

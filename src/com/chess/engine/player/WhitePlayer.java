@@ -65,7 +65,7 @@ public class WhitePlayer extends Player {
                 final chessTile rookTile = this.board.getTile(56);
                 if (rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()
                         && Player.calculateAttacksOnTile(58, opponentsLegals).isEmpty()
-                        && Player.calculateAttacksOnTile(59, legalMoves).isEmpty()
+                        && Player.calculateAttacksOnTile(59, opponentsLegals).isEmpty()
                         && rookTile.getPiece().getPieceType().isRook()) {
                     kingCastles.add(new QueenSideCastleMove(this.board,
                             this.playerKing,
