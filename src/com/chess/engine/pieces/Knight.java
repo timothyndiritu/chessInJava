@@ -8,7 +8,7 @@ import com.chess.engine.board.Move.AttackMove;
 import com.chess.engine.board.Move.MajorAttackMove;
 import com.chess.engine.board.Move.MajorMove;
 import com.chess.engine.board.chessTile;
-import com.google.common.collect.ImmutableList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +58,7 @@ public class Knight extends Piece {
 
         }
 
-        return ImmutableList.copyOf(legalMoves);
+        return List.copyOf(legalMoves);
     }
 
     @Override

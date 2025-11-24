@@ -3,7 +3,7 @@ package com.chess.gui;
 import com.chess.engine.board.Move;
 import com.chess.engine.pieces.Piece;
 import com.chess.gui.Table.MoveLog;
-import com.google.common.primitives.Ints;
+ 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -66,14 +66,14 @@ public class TakenPiecesPanel extends JPanel {
         Collections.sort(whiteTakenPieces, new Comparator<Piece>() {
             @Override
             public int compare(Piece o1, Piece o2) {
-                return Ints.compare(o1.getPieceValue(), o2.getPieceValue());
+                return Integer.compare(o1.getPieceValue(), o2.getPieceValue());
             }
         });
 
         Collections.sort(blackTakenPieces, new Comparator<Piece>() {
             @Override
             public int compare(Piece o1, Piece o2) {
-                return Ints.compare(o1.getPieceValue(), o2.getPieceValue());
+                return Integer.compare(o1.getPieceValue(), o2.getPieceValue());
             }
         });
 

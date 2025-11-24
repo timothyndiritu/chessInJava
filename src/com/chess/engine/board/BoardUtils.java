@@ -1,6 +1,6 @@
 package com.chess.engine.board;
 
-import com.google.common.collect.ImmutableMap;
+ 
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +50,7 @@ public class BoardUtils {
             positionToCoordinate.put(ALGEBREIC_NOTATION[i], i);
         }
         
-        return ImmutableMap.copyOf(positionToCoordinate);
+        return Map.copyOf(positionToCoordinate);
     }
     
     private static boolean[] initColumn(int columnNumber) {

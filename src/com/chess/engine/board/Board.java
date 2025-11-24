@@ -11,8 +11,7 @@ import com.chess.engine.pieces.Rook;
 import com.chess.engine.player.BlackPlayer;
 import com.chess.engine.player.Player;
 import com.chess.engine.player.WhitePlayer;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -90,7 +89,7 @@ public class Board {
             legalMoves.addAll(piece.calculateLegalMoves(this));
         }
 
-        return ImmutableList.copyOf(legalMoves);
+        return List.copyOf(legalMoves);
     }
 
     private static Collection<Piece> calculateActivePieces(final List<chessTile> gameBoard, final Alliance alliance) {
@@ -103,7 +102,7 @@ public class Board {
                 }
             }
         }
-        return ImmutableList.copyOf(activePieces);
+        return List.copyOf(activePieces);
     }
 
     public chessTile getTile(final int tileCoordinate) {
@@ -115,7 +114,7 @@ public class Board {
         for (int i = 0; i < BoardUtils.NUM_TILES; i++) {
             tiles[i] = chessTile.createTile(i, builder.boardConfig.get(i));
         }
-        return ImmutableList.copyOf(tiles);
+        return List.of(tiles);
     }
 
     public static Board createStandardBoard() {
@@ -163,7 +162,10 @@ public class Board {
     }
 
     public Iterable<Move> getAlllegalMoves() {
-        return Iterables.unmodifiableIterable(Iterables.concat(this.whitePlayer.getLegalMoves(), this.blackPlayer.getLegalMoves()));
+        final List<Move> allMoves = new ArrayList<>();
+        allMoves.addAll(this.whitePlayer.getLegalMoves());
+        allMoves.addAll(this.blackPlayer.getLegalMoves());
+        return Collections.unmodifiableList(allMoves);
     }
 
     public static class Builder {

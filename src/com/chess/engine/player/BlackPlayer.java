@@ -13,7 +13,7 @@ import com.chess.engine.board.Move.QueenSideCastleMove;
 import com.chess.engine.board.chessTile;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.pieces.Rook;
-import com.google.common.collect.ImmutableList;
+ 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -85,7 +85,7 @@ public class BlackPlayer extends Player {
                 }
             }
         }
-        return ImmutableList.copyOf(kingCastles);
+        return List.copyOf(kingCastles);
     }
 
 }

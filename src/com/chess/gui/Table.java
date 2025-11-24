@@ -6,7 +6,6 @@ import com.chess.engine.board.Move;
 import com.chess.engine.board.chessTile;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.player.MoveTransition;
-import com.google.common.collect.Lists;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -158,7 +157,9 @@ public class Table {
         }, FLIPPED {
             @Override
             List<TilePanel> traverse(List<TilePanel> boardTiles) {
-                return Lists.reverse(boardTiles);
+                final List<TilePanel> reversed = new ArrayList<>(boardTiles);
+                Collections.reverse(reversed);
+                return reversed;
             }
 
             @Override

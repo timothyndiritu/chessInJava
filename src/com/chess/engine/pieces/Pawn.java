@@ -13,7 +13,7 @@ import com.chess.engine.board.Move.PawnAttackMove;
 import com.chess.engine.board.Move.PawnEnPassantAttackMove;
 import com.chess.engine.board.Move.PawnJump;
 import com.chess.engine.board.Move.PawnMove;
-import com.google.common.collect.ImmutableList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -96,7 +96,7 @@ public class Pawn extends Piece {
             }
 
         }
-        return ImmutableList.copyOf(legalMoves);
+        return List.copyOf(legalMoves);
     }
 
     @Override
