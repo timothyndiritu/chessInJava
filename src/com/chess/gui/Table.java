@@ -11,10 +11,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.imageio.ImageIO;
+import javax.swing.GrayFilter;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -52,6 +56,9 @@ public class Table {
 
     private boolean highlightLegalMoves;
 
+    // new: track whether app window is active (has focus)
+    private boolean isActiveWindow;
+
     private final static Dimension OUTER_FRAME_DIMENSION = new Dimension(800, 650);
     private final static Dimension BOARD_PANEL_DIMENSION = new Dimension(400, 350);
     private final static Dimension TILE_PANEL_DIMENSION = new Dimension(10, 10);
@@ -73,6 +80,23 @@ public class Table {
         this.moveLog = new MoveLog();
         this.boardDirection = BoardDirection.NORMAL;
         this.highlightLegalMoves = false;
+
+        // initialize active state and listen for focus changes
+        this.isActiveWindow = true;
+        this.gameFrame.addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                isActiveWindow = true;
+                boardPanel.drawBoard(chessBoard);
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                isActiveWindow = false;
+                boardPanel.drawBoard(chessBoard);
+            }
+        });
+
         this.gameFrame.add(this.takenPiecesPanel, BorderLayout.WEST);
         this.gameFrame.add(this.boardPanel, BorderLayout.CENTER);
         this.gameFrame.add(this.gameHistoryPanel, BorderLayout.EAST);
@@ -253,6 +277,7 @@ public class Table {
             addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(final MouseEvent e) {
+                    System.out.println("Tile clicked: " + tileId);
                     if (isRightMouseButton(e)) {
                         sourceTile = null;
                         destinationTile = null;
@@ -340,7 +365,9 @@ public class Table {
                     final BufferedImage image
                             = ImageIO.read(new File(defaultPieceImagesPath + board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0, 1)
                                     + board.getTile(this.tileId).getPiece().toString() + ".png"));
-                    add(new JLabel(new ImageIcon(image)));
+                    // use grayscale/disabled image when window is inactive
+                    final Image displayImage = isActiveWindow ? image : GrayFilter.createDisabledImage(image);
+                    add(new JLabel(new ImageIcon(displayImage)));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -352,7 +379,11 @@ public class Table {
                 for (final Move move : pieceLegalMoves(board)) {
                     if (move.getDestinationCoordinate() == this.tileId) {
                         try {
-                            add(new JLabel(new ImageIcon(ImageIO.read(new File("art/misc/green_dot.png")))));
+                            Image dot = ImageIO.read(new File("art/misc/green_dot.png"));
+                            if (!isActiveWindow) {
+                                dot = GrayFilter.createDisabledImage(dot);
+                            }
+                            add(new JLabel(new ImageIcon(dot)));
                         } catch (final IOException e) {
                             e.printStackTrace();
                         }
