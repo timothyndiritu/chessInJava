@@ -133,6 +133,8 @@ public class Table {
             @Override
             public void actionPerformed(ActionEvent e) {
                 highlightLegalMoves = legalMovesHighlighterCheckBox.isSelected();
+                // Redraw board so highlights appear/disappear immediately
+                boardPanel.drawBoard(chessBoard);
             }
 
         });
@@ -264,6 +266,13 @@ public class Table {
                             if (humanMovedPiece == null) {
                                 sourceTile = null;
                             }
+                            // redraw immediately so legal-move highlights show for the selected piece
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    boardPanel.drawBoard(chessBoard);
+                                }
+                            });
                         } else {
                             //move the actual piece
                             destinationTile = chessBoard.getTile(tileId);
