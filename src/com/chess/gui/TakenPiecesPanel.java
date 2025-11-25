@@ -26,8 +26,9 @@ public class TakenPiecesPanel extends JPanel {
     private final JPanel northPanel;
     private final JPanel southPanel;
 
-    private static final Color PANEL_COLOR = Color.decode("0xFDFE6");
-    private final static Dimension TAKEN_PIECES_DIMENSION = new Dimension(40, 80);
+    // slightly adjusted color and size for better visibility
+    private static final Color PANEL_COLOR = Color.decode("#DADADA");
+    private final static Dimension TAKEN_PIECES_DIMENSION = new Dimension(100, 120);
     public static final EtchedBorder PANEL_BORDER = new EtchedBorder(EtchedBorder.RAISED);
 
     public TakenPiecesPanel() {
@@ -77,32 +78,37 @@ public class TakenPiecesPanel extends JPanel {
             }
         });
 
+        // White taken pieces -> north panel
         for (final Piece takenPiece : whiteTakenPieces) {
             try {
-                final BufferedImage image = ImageIO.read(new File("art/downloaded"
-                        + takenPiece.getPieceAlliance().toString().substring(0, 1) + "" + takenPiece.toString()));
-
-                final ImageIcon icon = new ImageIcon(image);
-                final JLabel imageLabel = new JLabel();
-                this.southPanel.add(imageLabel);
+                // Use the same naming scheme as the board piece loader and include ".png"
+                final String filename = "art/myFavorite/" +
+                        takenPiece.getPieceAlliance().toString().substring(0, 1) +
+                        takenPiece.toString() + ".png";
+                final BufferedImage img = ImageIO.read(new File(filename));
+                final ImageIcon icon = new ImageIcon(img.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH));
+                final JLabel imageLabel = new JLabel(icon);
+                this.northPanel.add(imageLabel);
             } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
 
+        // Black taken pieces -> south panel
         for (final Piece takenPiece : blackTakenPieces) {
             try {
-                final BufferedImage image = ImageIO.read(new File("art/downloaded/"
-                        + takenPiece.getPieceAlliance().toString().substring(0, 1) + takenPiece.toString().substring(0, 1) + ".png"));
-
-                final ImageIcon icon = new ImageIcon(image);
-                final JLabel imageLabel = new JLabel();
+                final String filename = "art/myFavorite/" +
+                        takenPiece.getPieceAlliance().toString().substring(0, 1) +
+                        takenPiece.toString() + ".png";
+                final BufferedImage img = ImageIO.read(new File(filename));
+                final ImageIcon icon = new ImageIcon(img.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH));
+                final JLabel imageLabel = new JLabel(icon);
                 this.southPanel.add(imageLabel);
             } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
-        validate();
-
+        this.validate();
+        this.repaint();
     }
 }
