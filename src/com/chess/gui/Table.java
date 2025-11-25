@@ -467,8 +467,12 @@ public class Table {
                             continue;
                         }
                         try {
+                            // choose red dot when overlaying a piece, otherwise green
+                            final boolean tileHasPiece = board.getTile(this.tileId).isTileOccupied();
+                            final String dotPath = tileHasPiece ? "art/misc/red_dot.png" : "art/misc/green_dot.png";
+
                             // load and scale dot so it can overlay the piece nicely
-                            Image dotRaw = ImageIO.read(new File("art/misc/green_dot.png"));
+                            Image dotRaw = ImageIO.read(new File(dotPath));
                             final Image dot = dotRaw.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
                             final Image displayDot = (isActiveWindow) ? dot : GrayFilter.createDisabledImage(dot);
 
