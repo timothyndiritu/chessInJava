@@ -32,13 +32,16 @@ public class Rook extends Piece {
             int candidateDestinationCoordinate = this.piecePosition;
 
             while (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+
+                // check column exclusions on the current square BEFORE stepping
+                if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
+                        || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
+                    break;
+                }
+
                 candidateDestinationCoordinate += candidateCoordinateOffset;
 
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
-                    if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
-                            || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
-                        break;
-                    }
 
                     final chessTile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
 
