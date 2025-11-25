@@ -504,7 +504,14 @@ public class Table {
 
         private Collection<Move> pieceLegalMoves(final Board board) {
             if (humanMovedPiece != null && humanMovedPiece.getPieceAlliance() == board.currentPlayer().getAlliance()) {
-                return humanMovedPiece.calculateLegalMoves(board);
+                final Collection<Move> playerMoves = board.currentPlayer().getLegalMoves();
+                final List<Move> pieceMoves = new ArrayList<>();
+                for (final Move move : playerMoves) {
+                    if (move.getMovedPiece().equals(humanMovedPiece)) {
+                        pieceMoves.add(move);
+                    }
+                }
+                return List.copyOf(pieceMoves);
             }
             return Collections.emptyList();
         }

@@ -207,7 +207,8 @@ public class Pawn extends Piece {
   public Pawn movePiece(final Move move) {
     return new Pawn(
       move.getDestinationCoordinate(),
-      move.getMovedPiece().getPieceAlliance()
+      move.getMovedPiece().getPieceAlliance(),
+      false
     );
   }
 
