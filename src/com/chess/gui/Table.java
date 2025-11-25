@@ -458,6 +458,11 @@ public class Table {
             if (highlightLegalMoves) {
                 for (final Move move : pieceLegalMoves(board)) {
                     if (move.getDestinationCoordinate() == this.tileId) {
+                        // Only highlight moves that are actually legal (i.e., do not leave king in check).
+                        final MoveTransition transition = board.currentPlayer().makeMove(move);
+                        if (!transition.getMoveStatus().isDone()) {
+                            continue;
+                        }
                         try {
                             Image dot = ImageIO.read(new File("art/misc/green_dot.png"));
                             if (!isActiveWindow) {
