@@ -108,6 +108,13 @@ public class Table {
         this.gameFrame.add(this.boardPanel, BorderLayout.CENTER);
         this.gameFrame.add(this.gameHistoryPanel, BorderLayout.EAST);
         this.gameFrame.setVisible(true);
+        // Ensure the board and frame request focus when first shown so the
+        // initial mouse click is delivered to components (prevents first-click
+        // being used only to focus the window on some platforms).
+        this.boardPanel.setFocusable(true);
+        this.boardPanel.requestFocusInWindow();
+        this.gameFrame.requestFocus();
+        this.gameFrame.toFront();
 
     }
 
@@ -213,6 +220,8 @@ public class Table {
 
         BoardPanel() {
             super(new GridLayout(8, 8));
+            // allow the panel to receive focus so requestFocusInWindow() works
+            setFocusable(true);
             this.boardTiles = new ArrayList<>();
             for (int i = 0; i < BoardUtils.NUM_TILES; i++) {
                 final TilePanel tilePanel = new TilePanel(this, i);
@@ -277,6 +286,8 @@ public class Table {
         TilePanel(final BoardPanel boardPanel,
                 final int tileId) {
             super(new GridBagLayout());
+            // allow tile panels to be focusable if needed
+            setFocusable(true);
             this.tileId = tileId;
             setPreferredSize(TILE_PANEL_DIMENSION);
             assignTileColor();
