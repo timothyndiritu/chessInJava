@@ -31,6 +31,7 @@ import javax.swing.GrayFilter;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.BorderFactory;
+import javax.swing.Timer;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -55,6 +56,10 @@ public class Table {
     private chessTile destinationTile;
     private Piece humanMovedPiece;
     private BoardDirection boardDirection;
+
+    // id of a tile to flash when an illegal move is attempted (-1 = none)
+    private int illegalMoveTile = -1;
+    private Timer illegalMoveTimer = null;
 
     private boolean highlightLegalMoves;
 
@@ -308,13 +313,36 @@ public class Table {
                             final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(), destinationTile.getTileCoordinate());
                             final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
 
-                            if (transition.getMoveStatus().isDone()) {
-                                chessBoard = transition.getTransitionBoard();
-                                moveLog.addMove(move);
-                            }
-                            sourceTile = null;
-                            destinationTile = null;
-                            humanMovedPiece = null;
+                                    if (transition.getMoveStatus().isDone()) {
+                                        chessBoard = transition.getTransitionBoard();
+                                        moveLog.addMove(move);
+                                    } else {
+                                        // illegal move: flash the destination tile red briefly
+                                        if (illegalMoveTimer != null) {
+                                            illegalMoveTimer.stop();
+                                            illegalMoveTimer = null;
+                                        }
+                                        illegalMoveTile = sourceTile.getTileCoordinate();
+                                        // redraw now to show the red flash
+                                        boardPanel.drawBoard(chessBoard);
+                                        illegalMoveTimer = new Timer(500, new ActionListener() {
+                                            @Override
+                                            public void actionPerformed(ActionEvent e) {
+                                                illegalMoveTile = -1;
+                                                boardPanel.drawBoard(chessBoard);
+                                                if (illegalMoveTimer != null) {
+                                                    illegalMoveTimer.stop();
+                                                    illegalMoveTimer = null;
+                                                }
+                                            }
+                                        });
+                                        illegalMoveTimer.setRepeats(false);
+                                        illegalMoveTimer.start();
+                                    }
+
+                                    sourceTile = null;
+                                    destinationTile = null;
+                                    humanMovedPiece = null;
                         }
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
@@ -361,6 +389,11 @@ public class Table {
             assignTileColor();
             assignTilePieceIcon(board);
             highlightLegals(board);
+            // if this tile is flagged for an illegal-move flash, paint it red
+            if (illegalMoveTile == this.tileId) {
+                setBackground(Color.RED);
+            }
+
             // highlight the selected source tile with a visible border
             if (sourceTile != null && sourceTile.getTileCoordinate() == this.tileId) {
                 // setBorder(BorderFactory.createLineBorder(Color.YELLOW, 4));
