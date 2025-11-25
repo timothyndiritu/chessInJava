@@ -467,17 +467,28 @@ public class Table {
                             continue;
                         }
                         try {
-                            Image dot = ImageIO.read(new File("art/misc/green_dot.png"));
-                            if (!isActiveWindow) {
-                                dot = GrayFilter.createDisabledImage(dot);
-                            }
+                            // load and scale dot so it can overlay the piece nicely
+                            Image dotRaw = ImageIO.read(new File("art/misc/green_dot.png"));
+                            final Image dot = dotRaw.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                            final Image displayDot = (isActiveWindow) ? dot : GrayFilter.createDisabledImage(dot);
+
+                            // place the dot in the same grid cell as the piece so it appears on top
                             final GridBagConstraints gbc = new GridBagConstraints();
                             gbc.gridx = 0;
-                            gbc.gridy = 1;
-                            gbc.anchor = GridBagConstraints.SOUTH;
-                            final JLabel dotLabel = new JLabel(new ImageIcon(dot));
+                            gbc.gridy = 0; // same cell as piece (was 1 previously)
+                            gbc.anchor = GridBagConstraints.CENTER; // center over the piece
+                            gbc.weightx = 1.0;
+                            gbc.weighty = 1.0;
+
+                            final JLabel dotLabel = new JLabel(new ImageIcon(displayDot));
+                            dotLabel.setOpaque(false);
                             dotLabel.addMouseListener(tileMouseListener);
+
+                            // add after piece then ensure it is in front (top of z-order)
                             add(dotLabel, gbc);
+                            setComponentZOrder(dotLabel, 0); // bring dot to front
+                            revalidate();
+                            repaint();
                         } catch (final IOException e) {
                             e.printStackTrace();
                         }
