@@ -14,7 +14,7 @@ import java.util.List;
 
 public class King extends Piece {
 
-    private final static int[] CANDIDATE_MOVE_COORDINATE = {-9, -8, - 7, 1, 1, 7, 8, 9};
+    private final static int[] CANDIDATE_MOVE_COORDINATE = {-9, -8, -7, -1, 1, 7, 8, 9};
 
     public King(final int piecePosition, final Alliance pieceAlliance) {
         super(PieceType.KING, piecePosition, pieceAlliance, true);
@@ -72,7 +72,7 @@ public class King extends Piece {
     }
 
     private static boolean isEighthColumnExclusion(final int currentPosition, final int candidateOffset) {
-        return BoardUtils.SECOND_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 1 || candidateOffset == 9);
+        return BoardUtils.EIGTH_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 1 || candidateOffset == 9);
     }
 
 }
