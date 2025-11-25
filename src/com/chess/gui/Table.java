@@ -61,7 +61,7 @@ public class Table {
     private int illegalMoveTile = -1;
     private Timer illegalMoveTimer = null;
 
-    private boolean highlightLegalMoves;
+    private boolean highlightLegalMoves = true;
 
     // new: track whether app window is active (has focus)
     private boolean isActiveWindow;
@@ -86,7 +86,7 @@ public class Table {
         this.boardPanel = new BoardPanel();
         this.moveLog = new MoveLog();
         this.boardDirection = BoardDirection.NORMAL;
-        this.highlightLegalMoves = false;
+        this.highlightLegalMoves = true;
 
         // initialize active state and listen for focus changes
         this.isActiveWindow = true;
@@ -165,7 +165,7 @@ public class Table {
 
         preferenceMenu.addSeparator();
 
-        final JCheckBoxMenuItem legalMovesHighlighterCheckBox = new JCheckBoxMenuItem("Highlight Legal Moves", false);
+        final JCheckBoxMenuItem legalMovesHighlighterCheckBox = new JCheckBoxMenuItem("Highlight Legal Moves", true);
 
         legalMovesHighlighterCheckBox.addActionListener(new ActionListener() {
             @Override
