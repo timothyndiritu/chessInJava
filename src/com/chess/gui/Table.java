@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -29,6 +30,7 @@ import javax.imageio.ImageIO;
 import javax.swing.GrayFilter;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -265,6 +267,7 @@ public class Table {
     private class TilePanel extends JPanel {
 
         private final int tileId;
+        private final MouseListener tileMouseListener;
 
         TilePanel(final BoardPanel boardPanel,
                 final int tileId) {
@@ -274,7 +277,8 @@ public class Table {
             assignTileColor();
             assignTilePieceIcon(chessBoard);
 
-            addMouseListener(new MouseListener() {
+            // store the listener so we can attach it to child components (piece image / dots)
+            this.tileMouseListener = new MouseListener() {
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     System.out.println("Tile clicked: " + tileId);
@@ -345,7 +349,10 @@ public class Table {
 
                 }
 
-            });
+            };
+
+            // attach to the tile panel itself
+            addMouseListener(this.tileMouseListener);
 
             validate();
         }
@@ -354,6 +361,16 @@ public class Table {
             assignTileColor();
             assignTilePieceIcon(board);
             highlightLegals(board);
+            // highlight the selected source tile with a visible border
+            if (sourceTile != null && sourceTile.getTileCoordinate() == this.tileId) {
+                // setBorder(BorderFactory.createLineBorder(Color.YELLOW, 4));
+                //change the background color to indicate selection to a lighter purple
+                setBackground(new Color(0xBFA2DB));
+                
+            } else {
+                setBorder(null);
+            }
+
             validate();
             repaint();
         }
@@ -365,9 +382,17 @@ public class Table {
                     final BufferedImage image
                             = ImageIO.read(new File(defaultPieceImagesPath + board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0, 1)
                                     + board.getTile(this.tileId).getPiece().toString() + ".png"));
-                    // use grayscale/disabled image when window is inactive
-                    final Image displayImage = isActiveWindow ? image : GrayFilter.createDisabledImage(image);
-                    add(new JLabel(new ImageIcon(displayImage)));
+                    // use grayscale/disabled image when window is inactive, but keep selected piece visible
+                    final boolean isSelected = sourceTile != null && sourceTile.getTileCoordinate() == this.tileId;
+                    final Image displayImage = (isActiveWindow || isSelected) ? image : GrayFilter.createDisabledImage(image);
+                    final GridBagConstraints gbc = new GridBagConstraints();
+                    gbc.gridx = 0;
+                    gbc.gridy = 0;
+                    gbc.anchor = GridBagConstraints.CENTER;
+                    final JLabel pieceLabel = new JLabel(new ImageIcon(displayImage));
+                    // also listen on the label so clicks on the image aren't swallowed by the child
+                    pieceLabel.addMouseListener(tileMouseListener);
+                    add(pieceLabel, gbc);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -383,7 +408,13 @@ public class Table {
                             if (!isActiveWindow) {
                                 dot = GrayFilter.createDisabledImage(dot);
                             }
-                            add(new JLabel(new ImageIcon(dot)));
+                            final GridBagConstraints gbc = new GridBagConstraints();
+                            gbc.gridx = 0;
+                            gbc.gridy = 1;
+                            gbc.anchor = GridBagConstraints.SOUTH;
+                            final JLabel dotLabel = new JLabel(new ImageIcon(dot));
+                            dotLabel.addMouseListener(tileMouseListener);
+                            add(dotLabel, gbc);
                         } catch (final IOException e) {
                             e.printStackTrace();
                         }
