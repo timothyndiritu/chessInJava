@@ -400,6 +400,17 @@ public class Table {
             assignTileColor();
             assignTilePieceIcon(board);
             highlightLegals(board);
+            // highlight the current player's king tile in red when in check
+            try {
+                if (board.currentPlayer().isInCheck()) {
+                    final int kingTile = board.currentPlayer().getPLayerKing().getPiecePosition();
+                    if (kingTile == this.tileId) {
+                        setBackground(Color.RED);
+                    }
+                }
+            } catch (final Exception e) {
+                // defensive: if something is null (e.g. no king found yet), ignore
+            }
             // if this tile is flagged for an illegal-move flash, paint it red
             if (illegalMoveTile == this.tileId) {
                 setBackground(Color.RED);
