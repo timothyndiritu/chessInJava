@@ -69,7 +69,7 @@ public class Table {
     private final static Dimension OUTER_FRAME_DIMENSION = new Dimension(800, 650);
     private final static Dimension BOARD_PANEL_DIMENSION = new Dimension(400, 350);
     private final static Dimension TILE_PANEL_DIMENSION = new Dimension(10, 10);
-    private static String defaultPieceImagesPath = "art/downloaded/";
+    private static String defaultPieceImagesPath = "art/myFavorite/";
 
     private final Color lightTileColor = new Color(0xE7E7CB);
     private final Color darkTileColor = new Color(0x8476BA);
@@ -434,12 +434,15 @@ public class Table {
             this.removeAll();
             if (board.getTile(this.tileId).isTileOccupied()) {
                 try {
-                    final BufferedImage image
-                            = ImageIO.read(new File(defaultPieceImagesPath + board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0, 1)
-                                    + board.getTile(this.tileId).getPiece().toString() + ".png"));
+                    // load the original image
+                    final Image origImage = ImageIO.read(new File(defaultPieceImagesPath
+                            + board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0, 1)
+                            + board.getTile(this.tileId).getPiece().toString() + ".png"));
+                    // scale to 60x60
+                    final Image scaledImage = origImage.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
                     // use grayscale/disabled image when window is inactive, but keep selected piece visible
                     final boolean isSelected = sourceTile != null && sourceTile.getTileCoordinate() == this.tileId;
-                    final Image displayImage = (isActiveWindow || isSelected) ? image : GrayFilter.createDisabledImage(image);
+                    final Image displayImage = (isActiveWindow || isSelected) ? scaledImage : GrayFilter.createDisabledImage(scaledImage);
                     final GridBagConstraints gbc = new GridBagConstraints();
                     gbc.gridx = 0;
                     gbc.gridy = 0;
