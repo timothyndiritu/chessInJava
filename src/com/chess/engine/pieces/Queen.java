@@ -31,14 +31,19 @@ public class Queen extends Piece {
         for (final int candidateCoordinateOffset : CANDIDATE_MOVE_VECTOR_COORDINATES) {
             int candidateDestinationCoordinate = this.piecePosition;
 
+            // iterate outwards in the given direction
             while (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+
+                // IMPORTANT: check column exclusions on the current coordinate BEFORE moving,
+                // otherwise you check the destination square and allow wrap-around moves.
+                if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
+                        || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
+                    break;
+                }
+
                 candidateDestinationCoordinate += candidateCoordinateOffset;
 
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
-                    if (isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)
-                            || isEigthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)) {
-                        break;
-                    }
 
                     final chessTile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
 
@@ -53,7 +58,6 @@ public class Queen extends Piece {
                         }
                         break;
                     }
-
                 }
             }
 
