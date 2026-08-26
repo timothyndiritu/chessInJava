@@ -49,6 +49,7 @@ public class Table {
     private final TakenPiecesPanel takenPiecesPanel;
     private final BoardPanel boardPanel;
     private final MoveLog moveLog;
+    private final GameSetup gameSetup; 
 
     private Board chessBoard;
 
@@ -74,7 +75,9 @@ public class Table {
     private final Color lightTileColor = new Color(0xE7E7CB);
     private final Color darkTileColor = new Color(0x8476BA);
 
-    public Table() {
+    private static final Table INSTANCE = new Table();
+
+    private Table() {
         this.gameFrame = new JFrame("Timothy's Chess in Java");
         this.gameFrame.setLayout(new BorderLayout());
         final JMenuBar tableMenuBar = createTableMenuBar();
@@ -87,6 +90,7 @@ public class Table {
         this.moveLog = new MoveLog();
         this.boardDirection = BoardDirection.NORMAL;
         this.highlightLegalMoves = true;
+        this.gameSetup = new GameSetup(this.gameFrame, true);
 
         // initialize active state and listen for focus changes
         this.isActiveWindow = true;
@@ -116,6 +120,18 @@ public class Table {
         this.gameFrame.requestFocus();
         this.gameFrame.toFront();
 
+    }
+
+    public static Table get() {
+        return INSTANCE;
+    }
+
+    public GameSetup getGameSetup() {
+        return this.gameSetup;
+    }
+
+    public void setupUpdate(final GameSetup gameSetup) {
+        // TODO: notify observers
     }
 
     private JMenuBar createTableMenuBar() {
@@ -182,6 +198,24 @@ public class Table {
         return preferenceMenu;
     }
 
+    private JMenu createOptionsMenu() {
+        final JMenu optionsMenu = new JMenu("Options");
+
+        final JMenu setupGameMenuItem = new JMenu("Setup Game");
+        setupGameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Table.get().getGameSetup().promptUser();
+                Table.get().setupUpdate(Table.get().getGameSetup());
+            }
+        });
+
+        optionsMenu.add(setupGameMenuItem);
+
+        return optionsMenu;
+
+    }
+
     public enum BoardDirection {
         NORMAL {
             @Override
@@ -194,7 +228,8 @@ public class Table {
                 return FLIPPED;
             }
 
-        }, FLIPPED {
+        },
+        FLIPPED {
             @Override
             List<TilePanel> traverse(List<TilePanel> boardTiles) {
                 final List<TilePanel> reversed = new ArrayList<>(boardTiles);
@@ -278,6 +313,11 @@ public class Table {
         }
     }
 
+    enum PlayerType {
+        HUMAN,
+        COMPUTER
+    }
+
     private class TilePanel extends JPanel {
 
         private final int tileId;
@@ -293,7 +333,8 @@ public class Table {
             assignTileColor();
             assignTilePieceIcon(chessBoard);
 
-            // store the listener so we can attach it to child components (piece image / dots)
+            // store the listener so we can attach it to child components (piece image /
+            // dots)
             this.tileMouseListener = new MouseListener() {
                 @Override
                 public void mouseClicked(final MouseEvent e) {
@@ -305,7 +346,7 @@ public class Table {
 
                     } else if (isLeftMouseButton(e)) {
                         if (sourceTile == null) {
-                            //pick piece to move
+                            // pick piece to move
                             sourceTile = chessBoard.getTile(tileId);
                             humanMovedPiece = sourceTile.getPiece();
                             if (humanMovedPiece == null) {
@@ -319,41 +360,42 @@ public class Table {
                                 }
                             });
                         } else {
-                            //move the actual piece
+                            // move the actual piece
                             destinationTile = chessBoard.getTile(tileId);
-                            final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(), destinationTile.getTileCoordinate());
+                            final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(),
+                                    destinationTile.getTileCoordinate());
                             final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
 
-                                    if (transition.getMoveStatus().isDone()) {
-                                        chessBoard = transition.getTransitionBoard();
-                                        moveLog.addMove(move);
-                                    } else {
-                                        // illegal move: flash the destination tile red briefly
+                            if (transition.getMoveStatus().isDone()) {
+                                chessBoard = transition.getTransitionBoard();
+                                moveLog.addMove(move);
+                            } else {
+                                // illegal move: flash the destination tile red briefly
+                                if (illegalMoveTimer != null) {
+                                    illegalMoveTimer.stop();
+                                    illegalMoveTimer = null;
+                                }
+                                illegalMoveTile = sourceTile.getTileCoordinate();
+                                // redraw now to show the red flash
+                                boardPanel.drawBoard(chessBoard);
+                                illegalMoveTimer = new Timer(500, new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        illegalMoveTile = -1;
+                                        boardPanel.drawBoard(chessBoard);
                                         if (illegalMoveTimer != null) {
                                             illegalMoveTimer.stop();
                                             illegalMoveTimer = null;
                                         }
-                                        illegalMoveTile = sourceTile.getTileCoordinate();
-                                        // redraw now to show the red flash
-                                        boardPanel.drawBoard(chessBoard);
-                                        illegalMoveTimer = new Timer(500, new ActionListener() {
-                                            @Override
-                                            public void actionPerformed(ActionEvent e) {
-                                                illegalMoveTile = -1;
-                                                boardPanel.drawBoard(chessBoard);
-                                                if (illegalMoveTimer != null) {
-                                                    illegalMoveTimer.stop();
-                                                    illegalMoveTimer = null;
-                                                }
-                                            }
-                                        });
-                                        illegalMoveTimer.setRepeats(false);
-                                        illegalMoveTimer.start();
                                     }
+                                });
+                                illegalMoveTimer.setRepeats(false);
+                                illegalMoveTimer.start();
+                            }
 
-                                    sourceTile = null;
-                                    destinationTile = null;
-                                    humanMovedPiece = null;
+                            sourceTile = null;
+                            destinationTile = null;
+                            humanMovedPiece = null;
                         }
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
@@ -419,9 +461,9 @@ public class Table {
             // highlight the selected source tile with a visible border
             if (sourceTile != null && sourceTile.getTileCoordinate() == this.tileId) {
                 // setBorder(BorderFactory.createLineBorder(Color.YELLOW, 4));
-                //change the background color to indicate selection to a lighter purple
+                // change the background color to indicate selection to a lighter purple
                 setBackground(new Color(0xBFA2DB));
-                
+
             } else {
                 setBorder(null);
             }
@@ -440,9 +482,11 @@ public class Table {
                             + board.getTile(this.tileId).getPiece().toString() + ".png"));
                     // scale to 60x60
                     final Image scaledImage = origImage.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-                    // use grayscale/disabled image when window is inactive, but keep selected piece visible
+                    // use grayscale/disabled image when window is inactive, but keep selected piece
+                    // visible
                     final boolean isSelected = sourceTile != null && sourceTile.getTileCoordinate() == this.tileId;
-                    final Image displayImage = (isActiveWindow || isSelected) ? scaledImage : GrayFilter.createDisabledImage(scaledImage);
+                    final Image displayImage = (isActiveWindow || isSelected) ? scaledImage
+                            : GrayFilter.createDisabledImage(scaledImage);
                     final GridBagConstraints gbc = new GridBagConstraints();
                     gbc.gridx = 0;
                     gbc.gridy = 0;
@@ -461,7 +505,8 @@ public class Table {
             if (highlightLegalMoves) {
                 for (final Move move : pieceLegalMoves(board)) {
                     if (move.getDestinationCoordinate() == this.tileId) {
-                        // Only highlight moves that are actually legal (i.e., do not leave king in check).
+                        // Only highlight moves that are actually legal (i.e., do not leave king in
+                        // check).
                         final MoveTransition transition = board.currentPlayer().makeMove(move);
                         if (!transition.getMoveStatus().isDone()) {
                             continue;
@@ -532,4 +577,5 @@ public class Table {
         }
 
     }
+
 }
