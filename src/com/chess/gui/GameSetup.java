@@ -11,8 +11,8 @@ import java.awt.event.ActionListener;
 
 public class GameSetup extends JDialog {
 
-  private PlayerType whitePlayerType;
-  private PlayerType blackPlayerType;
+  private PlayerType whitePlayerType = PlayerType.HUMAN;
+  private PlayerType blackPlayerType = PlayerType.HUMAN;
   private JSpinner searchDepthSpinner;
 
   private static final String HUMAN_TEXT = "Human";

@@ -6,6 +6,8 @@ import com.chess.engine.board.Move;
 import com.chess.engine.board.chessTile;
 import com.chess.engine.pieces.Piece;
 import com.chess.engine.player.MoveTransition;
+import com.chess.engine.player.AI.MinMax;
+import com.chess.engine.player.AI.MoveStrategy;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,6 +32,8 @@ import javax.imageio.ImageIO;
 import javax.swing.GrayFilter;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.SwingWorker;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.Timer;
 import javax.swing.JFrame;
@@ -130,14 +134,62 @@ public class Table {
         return this.gameSetup;
     }
 
+    public Board getGameBoard() {
+        return this.chessBoard;
+    }
+
     public void setupUpdate(final GameSetup gameSetup) {
-        // TODO: notify observers
+        moveMadeUpdate(PlayerType.HUMAN); // Trigger check to see if AI needs to play
+    }
+
+    private void updateComputerMove(final Move move) {
+        this.chessBoard = this.chessBoard.currentPlayer().makeMove(move).getTransitionBoard();
+        this.moveLog.addMove(move);
+        this.gameHistoryPanel.redo(this.chessBoard, this.moveLog);
+        this.takenPiecesPanel.redo(this.moveLog);
+        this.boardPanel.drawBoard(this.chessBoard);
+        moveMadeUpdate(PlayerType.COMPUTER);
+    }
+
+    private void moveMadeUpdate(final PlayerType playerType) {
+        if (this.gameSetup.isAIPlayer(this.chessBoard.currentPlayer()) &&
+                !this.chessBoard.currentPlayer().isInCheckMate() &&
+                !this.chessBoard.currentPlayer().isInStaleMate()) {
+            final AIThinkRoutine thinkRoutine = new AIThinkRoutine();
+            thinkRoutine.execute();
+        }
+    }
+
+    private static class AIThinkRoutine extends SwingWorker<Move, String> {
+
+        private AIThinkRoutine() {
+        }
+
+        @Override
+        protected Move doInBackground() throws Exception {
+            final MoveStrategy minMax = new MinMax(Table.get().getGameSetup().getSearchDepth());
+            final Move bestMove = minMax.execute(Table.get().getGameBoard());
+            return bestMove;
+        }
+
+        @Override
+        public void done() {
+            try {
+                final Move bestMove = get();
+                if (bestMove != null) {
+                    Table.get().updateComputerMove(bestMove);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private JMenuBar createTableMenuBar() {
         final JMenuBar tableMenuBar = new JMenuBar();
         tableMenuBar.add(createFileMenu());
         tableMenuBar.add(createPreferencesMenu());
+        tableMenuBar.add(createOptionsMenu());
         return tableMenuBar;
     }
 
@@ -201,7 +253,7 @@ public class Table {
     private JMenu createOptionsMenu() {
         final JMenu optionsMenu = new JMenu("Options");
 
-        final JMenu setupGameMenuItem = new JMenu("Setup Game");
+        final JMenuItem setupGameMenuItem = new JMenuItem("Setup Game");
         setupGameMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -403,7 +455,7 @@ public class Table {
                                 gameHistoryPanel.redo(chessBoard, moveLog);
                                 takenPiecesPanel.redo(moveLog);
                                 boardPanel.drawBoard(chessBoard);
-
+                                moveMadeUpdate(PlayerType.HUMAN);
                             }
                         });
                     }
